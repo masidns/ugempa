@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="<?= base_url() ?>/bootstrap/css/bootstrap.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="<?= base_url() ?>/plugins/datatables/dataTables.bootstrap.css">
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- Theme style -->
@@ -63,6 +65,9 @@
     <script src="<?= base_url() ?>/plugins/jQuery/jQuery-2.1.4.min.js"></script>
     <!-- Bootstrap 3.3.5 -->
     <script src="<?= base_url() ?>/bootstrap/js/bootstrap.min.js"></script>
+    <!-- DataTables -->
+    <script src="<?= base_url() ?>/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="<?= base_url() ?>/plugins/datatables/dataTables.bootstrap.min.js"></script>
     <!-- SlimScroll -->
     <script src="<?= base_url() ?>/plugins/slimScroll/jquery.slimscroll.min.js"></script>
     <!-- FastClick -->
@@ -71,6 +76,19 @@
     <script src="<?= base_url() ?>/dist/js/app.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="<?= base_url() ?>/dist/js/demo.js"></script>
+    <script>
+        $(function() {
+            $("#example1").DataTable();
+            $('#example2').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false
+            });
+        });
+    </script>
 </body>
 
 </html>
