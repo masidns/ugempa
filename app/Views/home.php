@@ -4,7 +4,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            Fixed Layout
+            Data Gempa
             <!-- <small>Blank example to the fixed layout</small> -->
         </h1>
         <ol class="breadcrumb">
