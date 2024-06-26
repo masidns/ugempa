@@ -9,6 +9,6 @@ class Testing extends BaseController
 {
     public function index()
     {
-        return view('fixed');
+        return view('home');
     }
 }
