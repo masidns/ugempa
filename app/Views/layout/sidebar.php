@@ -53,7 +53,7 @@
             </li> -->
 
             <li>
-                <a href="../widgets.html">
+                <a href="<?= base_url('Gempa') ?>">
                     <i class="fa fa-th"></i> <span>Data Gempa</span>
                     <!-- <small class="label pull-right bg-green">new</small> -->
                 </a>
