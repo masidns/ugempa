@@ -14,9 +14,9 @@ class GempaModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'idgempa',
-        'tanggal',
+        'tgl',
         'lat',
-        'long',
+        'lon',
         'depth',
         'mag',
         'remark'

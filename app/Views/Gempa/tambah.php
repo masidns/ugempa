@@ -34,7 +34,7 @@
                                     <div class="input-group-addon">
                                         <i class="fa fa-calendar"></i>
                                     </div>
-                                    <input name="tanggal" type="date" class="form-control" data-inputmask="'alias': 'dd/mm/yyyy'" data-mask="">
+                                    <input name="tgl" type="date" class="form-control" data-inputmask="'alias': 'dd/mm/yyyy'" data-mask="">
                                 </div><!-- /.input group -->
                             </div>
                             <div class="form-group">
@@ -43,7 +43,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Longitude</label>
-                                <input name="long" type="text" class="form-control">
+                                <input name="lon" type="text" class="form-control">
                             </div>
 
                         </div><!-- /.col -->

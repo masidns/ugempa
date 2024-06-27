@@ -20,8 +20,11 @@
         <div class="box">
             <div class="box-header">
                 <h3 class="box-title">Data Table With Full Features</h3>
+                <a href="<?= base_url('/Gempa/CSV') ?>" class="btn bg-olive btn-flat margin" style="float: right;">
+                    ADD CSV <i class="fa fa-file-excel-o" aria-hidden="true"></i>
+                </a>
                 <a href="<?= base_url('/Gempa/tambah') ?>" class="btn bg-olive btn-flat margin" style="float: right;">Tambah
-                    Data</a>
+                </a>
             </div><!-- /.box-header -->
             <div class="box-body">
                 <table id="example1" class="table table-bordered table-striped">
@@ -39,9 +42,9 @@
                     <tbody>
                         <?php foreach ($datagempa as $key => $value) : ?>
                             <tr>
-                                <td><?= $value['tanggal'] ?></td>
+                                <td><?= $value['tgl'] ?></td>
                                 <td><?= $value['lat'] ?></td>
-                                <td><?= $value['long'] ?></td>
+                                <td><?= $value['lon'] ?></td>
                                 <td><?= $value['depth'] ?></td>
                                 <td><?= $value['mag'] ?></td>
                                 <td><?= $value['remark'] ?></td>

@@ -59,7 +59,7 @@
                 </a>
             </li>
             <li>
-                <a href="../widgets.html">
+                <a href="<?= base_url('Clustering') ?>">
                     <i class="fa fa-th"></i> <span>Clustering</span>
                     <!-- <small class="label pull-right bg-green">new</small> -->
                 </a>
