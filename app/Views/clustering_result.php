@@ -16,34 +16,40 @@
             </div>
             <div class="box-body">
                 <?php if (!empty($clusters) && is_array($clusters)) : ?>
-                    <table class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
-                                <th>Depth</th>
-                                <th>Magnitude</th>
-                                <th>Remark</th>
-                                <th>Cluster</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($clusters as $point) : ?>
-                                <tr>
-                                    <td><?= $point['tgl'] ?></td>
-                                    <td><?= $point['lat'] ?></td>
-                                    <td><?= $point['lon'] ?></td>
-                                    <td><?= $point['depth'] ?></td>
-                                    <td><?= $point['mag'] ?></td>
-                                    <td><?= $point['remark'] ?></td>
-                                    <td><?= $point['cluster'] ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Depth</th>
+                            <th>Magnitude</th>
+                            <th>Remark</th>
+                            <th>Cluster</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($clusters as $point) : ?>
+                        <tr>
+                            <td><?= $point['tgl'] ?></td>
+                            <td><?= $point['lat'] ?></td>
+                            <td><?= $point['lon'] ?></td>
+                            <td><?= $point['depth'] ?></td>
+                            <td><?= $point['mag'] ?></td>
+                            <td><?= $point['remark'] ?></td>
+                            <td><?= $point['cluster'] ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
                 <?php else : ?>
-                    <p>Tidak ada data clustering yang ditemukan atau terjadi kesalahan dalam pemrosesan.</p>
+                <p>Tidak ada data clustering yang ditemukan atau terjadi kesalahan dalam pemrosesan.</p>
+                <?php endif; ?>
+
+                <?php if (isset($image_base64)) : ?>
+                <h3>Visualisasi Cluster</h3>
+                <img src="data:image/png;base64,<?= $image_base64 ?>" alt="Cluster Visualization"
+                    style="max-width: 100%; height: auto;">
                 <?php endif; ?>
             </div>
         </div>

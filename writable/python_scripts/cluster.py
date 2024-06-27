@@ -5,11 +5,7 @@ import json
 
 def main(csv_file_path, n_clusters):
     try:
-        print(f"Reading CSV file from: {csv_file_path}", file=sys.stderr)
         data = pd.read_csv(csv_file_path)
-        print(f"Data read successfully: {data.head()}", file=sys.stderr)
-        
-        print(f"Performing KMeans clustering with {n_clusters} clusters.", file=sys.stderr)
         kmeans = KMeans(n_clusters=n_clusters)
         kmeans.fit(data[['depth', 'mag']])
         data['cluster'] = kmeans.labels_

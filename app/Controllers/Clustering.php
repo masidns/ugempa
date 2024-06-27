@@ -29,40 +29,48 @@ class Clustering extends Controller
         }
         fclose($file);
 
-        // Debugging: Baca isi file CSV dan log
-        $csvContent = file_get_contents($tempCsvPath);
-        log_message('debug', 'Isi file CSV: ' . $csvContent);
-
         // Jalankan skrip Python untuk clustering
         $pythonExecutable = 'python'; // Gunakan 'python' jika python3 tidak dikenali
-        $scriptPath = WRITEPATH . 'python_scripts/cluster.py';
-        $command = escapeshellcmd("{$pythonExecutable} \"{$scriptPath}\" \"{$tempCsvPath}\" {$n_clusters} 2>&1");
-        log_message('debug', 'Menjalankan command: ' . $command);
+        $clusterScriptPath = WRITEPATH . 'python_scripts/cluster.py';
+        $command = escapeshellcmd("{$pythonExecutable} \"{$clusterScriptPath}\" \"{$tempCsvPath}\" {$n_clusters} 2>&1");
+        log_message('debug', 'Menjalankan command clustering: ' . $command);
         $output = shell_exec($command);
+        log_message('debug', 'Output dari skrip Python clustering: ' . $output);
 
-        // Debugging: Log output dari skrip Python
-        log_message('debug', 'Output dari skrip Python: ' . $output);
-
-        // Debugging: Periksa apakah output adalah JSON yang valid
-        if (is_null($output) || empty($output)) {
-            log_message('error', 'Output skrip Python kosong atau null.');
-        }
-
+        // Periksa hasil clustering
         $clusters = json_decode($output, true);
-
-        // Tambahkan penanganan error JSON decoding di sini
         if (json_last_error() !== JSON_ERROR_NONE) {
             log_message('error', 'JSON decoding error: ' . json_last_error_msg());
+            $clusters = [];
         }
 
-        // Debugging: Log hasil decode JSON
-        log_message('debug', 'Hasil decode JSON: ' . print_r($clusters, true));
+        // Tambahkan hasil clustering ke data gempa
+        foreach ($gempaData as $key => $gempa) {
+            $gempaData[$key]['cluster'] = $clusters[$key]['cluster'] ?? null;
+        }
 
-        if (!is_array($clusters)) {
-            $clusters = []; // Pastikan $clusters adalah array
+        // Simpan data gempa yang sudah termasuk cluster ke file sementara
+        $file = fopen($tempCsvPath, 'w');
+        fputcsv($file, ['tgl', 'lat', 'lon', 'depth', 'mag', 'remark', 'cluster']);
+        foreach ($gempaData as $gempa) {
+            fputcsv($file, [$gempa['tgl'], $gempa['lat'], $gempa['lon'], $gempa['depth'], $gempa['mag'], $gempa['remark'], $gempa['cluster']]);
+        }
+        fclose($file);
+
+        // Jalankan skrip Python untuk visualisasi dan dapatkan gambar sebagai base64
+        $visualizeScriptPath = WRITEPATH . 'python_scripts/visualize_clusters.py';
+        $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$tempCsvPath}\" 2>&1");
+        log_message('debug', 'Menjalankan command visualisasi: ' . $command);
+        $output = shell_exec($command);
+        log_message('debug', 'Output dari skrip Python visualisasi: ' . $output);
+
+        // Pastikan output gambar base64 valid
+        if (empty($output)) {
+            log_message('error', 'Output skrip Python visualisasi kosong.');
         }
 
         $data['clusters'] = $clusters;
+        $data['image_base64'] = $output;
         echo view('clustering_result', $data);
     }
 }
