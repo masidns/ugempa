@@ -13,10 +13,14 @@
         <div class="box">
             <div class="box-header">
                 <h3 class="box-title">Cluster Results</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                </div>
             </div>
             <div class="box-body">
                 <?php if (!empty($clusters) && is_array($clusters)) : ?>
-                <table class="table table-bordered table-striped">
+                <table id="example1" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>Tanggal</th>
@@ -46,6 +50,20 @@
                 <p>Tidak ada data clustering yang ditemukan atau terjadi kesalahan dalam pemrosesan.</p>
                 <?php endif; ?>
 
+            </div>
+        </div>
+        <!-- </section>
+
+    <section class="content"> -->
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Cluster Results</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
                 <?php if (isset($image_base64)) : ?>
                 <h3>Visualisasi Cluster</h3>
                 <img src="data:image/png;base64,<?= $image_base64 ?>" alt="Cluster Visualization"
