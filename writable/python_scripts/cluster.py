@@ -4,28 +4,33 @@ from sklearn.cluster import KMeans
 
 def main(input_csv, n_clusters):
     try:
+        # Mencetak jumlah cluster yang diterima
         print(f"Jumlah cluster yang diterima: {n_clusters}")
+        # Membaca data dari file CSV
         print(f"Reading CSV file from: {input_csv}")
 
-        data = pd.read_csv(input_csv)
-        non_coordinate_columns = ['depth', 'mag']
+        data = pd.read_csv(input_csv)  # Membaca data gempa dari file CSV
+        non_coordinate_columns = ['depth', 'mag']  # Kolom yang digunakan untuk clustering
 
         print(f"Non-coordinate columns: {non_coordinate_columns}")
 
-        X = data[non_coordinate_columns]
+        X = data[non_coordinate_columns]  # Memilih kolom untuk clustering
 
+        # Menjalankan KMeans dengan jumlah cluster yang ditentukan
         print(f"Running KMeans with n_clusters={n_clusters}")
-        kmeans = KMeans(n_clusters=int(n_clusters), random_state=0).fit(X)
+        kmeans = KMeans(n_clusters=int(n_clusters), random_state=0).fit(X)  # Menggunakan KMeans untuk clustering
 
-        data['cluster'] = kmeans.labels_
+        data['cluster'] = kmeans.labels_  # Menambahkan hasil clustering ke kolom baru 'cluster'
 
-        output_csv = input_csv.replace('.csv', '_clustered.csv')
-        data.to_csv(output_csv, index=False)
+        # Menyimpan data yang sudah dikelompokkan ke file CSV baru
+        output_csv = input_csv.replace('.csv', '_clustered.csv')  # Mengubah nama file output
+        data.to_csv(output_csv, index=False)  # Menyimpan data ke file CSV
         print(f"Clustered data saved to: {output_csv}")
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error: {str(e)}")  # Menampilkan pesan error jika terjadi kesalahan
 
 if __name__ == "__main__":
-    input_csv = sys.argv[1]
-    n_clusters = sys.argv[2]
-    main(input_csv, n_clusters)
+    # Mengambil argumen dari command line
+    input_csv = sys.argv[1]  # Path file CSV input
+    n_clusters = sys.argv[2]  # Jumlah cluster yang diinginkan
+    main(input_csv, n_clusters)  # Menjalankan fungsi utama dengan argumen yang diberikan
