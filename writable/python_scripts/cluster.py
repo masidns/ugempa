@@ -1,37 +1,31 @@
 import sys
 import pandas as pd
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-import json
 
-def main(csv_file_path, n_clusters):
+def main(input_csv, n_clusters):
     try:
-        # Baca data
-        data = pd.read_csv(csv_file_path)
-        
-        # Praproses: Menghapus baris dengan nilai yang hilang
-        data.dropna(inplace=True)
-        
-        # Identifikasi kolom non-koordinat untuk normalisasi
-        non_coordinate_columns = data.columns.difference(['lat', 'lon', 'tgl', 'remark'])
-        print(f"Non-coordinate columns: {non_coordinate_columns}", file=sys.stderr)
-        
-        # Praproses: Normalisasi data untuk semua kolom non-koordinat
-        scaler = StandardScaler()
-        data[non_coordinate_columns] = scaler.fit_transform(data[non_coordinate_columns])
-        
-        # Clustering menggunakan semua kolom
-        kmeans = KMeans(n_clusters=n_clusters)
-        kmeans.fit(data[non_coordinate_columns])
+        print(f"Jumlah cluster yang diterima: {n_clusters}")
+        print(f"Reading CSV file from: {input_csv}")
+
+        data = pd.read_csv(input_csv)
+        non_coordinate_columns = ['depth', 'mag']
+
+        print(f"Non-coordinate columns: {non_coordinate_columns}")
+
+        X = data[non_coordinate_columns]
+
+        print(f"Running KMeans with n_clusters={n_clusters}")
+        kmeans = KMeans(n_clusters=int(n_clusters), random_state=0).fit(X)
+
         data['cluster'] = kmeans.labels_
-        
-        # Mengembalikan hasil clustering sebagai JSON
-        result = data.to_json(orient='records')
-        print(result)
+
+        output_csv = input_csv.replace('.csv', '_clustered.csv')
+        data.to_csv(output_csv, index=False)
+        print(f"Clustered data saved to: {output_csv}")
     except Exception as e:
-        print(f"Error: {str(e)}", file=sys.stderr)
+        print(f"Error: {str(e)}")
 
 if __name__ == "__main__":
-    csv_file_path = sys.argv[1]
-    n_clusters = int(sys.argv[2])
-    main(csv_file_path, n_clusters)
+    input_csv = sys.argv[1]
+    n_clusters = sys.argv[2]
+    main(input_csv, n_clusters)

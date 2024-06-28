@@ -15,10 +15,10 @@
                 <h3 class="box-title">Pilih Jumlah Cluster</h3>
             </div>
             <div class="box-body">
-                <form action="<?= base_url('/Clustering/cluster') ?>" method="post">
+                <form method="post" action="<?= base_url('clustering/cluster') ?>">
                     <div class="form-group">
-                        <label for="n_clusters">Jumlah Cluster</label>
-                        <input type="number" name="n_clusters" class="form-control" id="n_clusters" required>
+                        <label for="n_clusters">Jumlah Cluster:</label>
+                        <input type="number" class="form-control" id="n_clusters" name="n_clusters" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Cluster</button>
                 </form>

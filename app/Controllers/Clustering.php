@@ -15,80 +15,113 @@ class Clustering extends Controller
     public function cluster()
     {
         $n_clusters = $this->request->getPost('n_clusters');
+        log_message('debug', 'Jumlah cluster yang diterima dari form: ' . $n_clusters);
+
+        if (empty($n_clusters)) {
+            log_message('error', 'Jumlah cluster tidak ditemukan di form.');
+            return;
+        }
+
         $model = new GempaModel();
         $gempaData = $model->findAll();
 
-        // Simpan data gempa ke file sementara
+        // Filter data untuk hanya menyertakan baris yang mengandung kata "Indonesia"
+        $filteredData = array_filter($gempaData, function ($item) {
+            return stripos($item['remark'], 'Indonesia') !== false;
+        });
+
+        // Jumlah total data sebelum dan setelah filtering
+        $total_data_before = count($gempaData);
+        $total_data_after = count($filteredData);
+        $total_data_removed = $total_data_before - $total_data_after;
+
+        // Simpan data gempa yang telah difilter ke file sementara
         $tempCsvPath = WRITEPATH . 'uploads/temp_gempa_data.csv';
         $file = fopen($tempCsvPath, 'w');
-        // Pastikan header sesuai dengan kolom di database
         fputcsv($file, ['tgl', 'lat', 'lon', 'depth', 'mag', 'remark']);
 
-        foreach ($gempaData as $gempa) {
+        foreach ($filteredData as $gempa) {
             fputcsv($file, [$gempa['tgl'], $gempa['lat'], $gempa['lon'], $gempa['depth'], $gempa['mag'], $gempa['remark']]);
         }
         fclose($file);
 
         // Jalankan skrip Python untuk clustering
-        $pythonExecutable = 'python'; // Gunakan 'python' jika python3 tidak dikenali
+        $pythonExecutable = 'python';
         $clusterScriptPath = WRITEPATH . 'python_scripts/cluster.py';
         $command = escapeshellcmd("{$pythonExecutable} \"{$clusterScriptPath}\" \"{$tempCsvPath}\" {$n_clusters} 2>&1");
         log_message('debug', 'Menjalankan command clustering: ' . $command);
         $output = shell_exec($command);
         log_message('debug', 'Output dari skrip Python clustering: ' . $output);
 
-        // Periksa hasil clustering
-        $clusters = json_decode($output, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            log_message('error', 'JSON decoding error: ' . json_last_error_msg());
-            $clusters = [];
+        // Path hasil clustering
+        $result_csv_path = str_replace(".csv", "_clustered.csv", $tempCsvPath);
+        if (!file_exists($result_csv_path)) {
+            log_message('error', 'File hasil clustering tidak ditemukan.');
+            return;
         }
 
-        // Tambahkan hasil clustering ke data gempa
-        foreach ($gempaData as $key => $gempa) {
-            $gempaData[$key]['cluster'] = $clusters[$key]['cluster'] ?? null;
-        }
+        // Baca hasil clustering
+        $clusteredData = array_map('str_getcsv', file($result_csv_path));
+        $header = array_shift($clusteredData); // Mengambil header
+        $clusteredData = array_map(function ($row) use ($header) {
+            return array_combine($header, $row);
+        }, $clusteredData);
 
-        // Simpan data gempa yang sudah termasuk cluster ke file sementara
-        $file = fopen($tempCsvPath, 'w');
-        fputcsv($file, ['tgl', 'lat', 'lon', 'depth', 'mag', 'remark', 'cluster']);
-        foreach ($gempaData as $gempa) {
-            fputcsv($file, [$gempa['tgl'], $gempa['lat'], $gempa['lon'], $gempa['depth'], $gempa['mag'], $gempa['remark'], $gempa['cluster']]);
-        }
-        fclose($file);
-
-        // Jalankan skrip Python untuk menghasilkan peta
+        // Jalankan skrip Python untuk menghasilkan peta sebelum clustering
         $mapScriptPath = WRITEPATH . 'python_scripts/generate_map.py';
-        $outputMapPath = FCPATH . 'uploads/cluster_map.html'; // Simpan di direktori public
-        $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$tempCsvPath}\" \"{$outputMapPath}\" 2>&1");
-        log_message('debug', 'Menjalankan command generate map: ' . $command);
+        $preClusteredMapPath = FCPATH . 'uploads/pre_clustered_map.html';
+        $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$tempCsvPath}\" \"{$preClusteredMapPath}\" true 2>&1");
+        log_message('debug', 'Menjalankan command generate map (pre-clustered): ' . $command);
         $output = shell_exec($command);
-        log_message('debug', 'Output dari skrip Python generate map: ' . $output);
+        log_message('debug', 'Output dari skrip Python generate map (pre-clustered): ' . $output);
 
-        // Pastikan peta dihasilkan dengan benar
-        if (file_exists($outputMapPath)) {
-            $data['map_path'] = base_url('uploads/cluster_map.html');
+        if (file_exists($preClusteredMapPath)) {
+            $data['pre_clustered_map_path'] = base_url('uploads/pre_clustered_map.html');
         } else {
-            log_message('error', 'Peta tidak berhasil dihasilkan.');
-            $data['map_path'] = null;
+            log_message('error', 'Peta sebelum clustering tidak berhasil dihasilkan.');
+            $data['pre_clustered_map_path'] = null;
+        }
+
+        // Jalankan skrip Python untuk menghasilkan peta setelah clustering
+        $postClusteredMapPath = FCPATH . 'uploads/post_clustered_map.html';
+        $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$result_csv_path}\" \"{$postClusteredMapPath}\" false 2>&1");
+        log_message('debug', 'Menjalankan command generate map (post-clustered): ' . $command);
+        $output = shell_exec($command);
+        log_message('debug', 'Output dari skrip Python generate map (post-clustered): ' . $output);
+
+        if (file_exists($postClusteredMapPath)) {
+            $data['post_clustered_map_path'] = base_url('uploads/post_clustered_map.html');
+        } else {
+            log_message('error', 'Peta setelah clustering tidak berhasil dihasilkan.');
+            $data['post_clustered_map_path'] = null;
         }
 
         // Jalankan skrip Python untuk visualisasi cluster
         $visualizeScriptPath = WRITEPATH . 'python_scripts/visualize_clusters.py';
-        $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$tempCsvPath}\" 2>&1");
+        $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$result_csv_path}\" 2>&1");
         log_message('debug', 'Menjalankan command visualize clusters: ' . $command);
         $output = shell_exec($command);
         log_message('debug', 'Output dari skrip Python visualize clusters: ' . $output);
 
-        // Periksa hasil visualisasi
         if (!empty($output) && strpos($output, 'Error') === false) {
-            $data['image_base64'] = trim($output);
+            $image_base64 = trim($output);
+            log_message('debug', 'Image Base64: ' . $image_base64);
         } else {
             log_message('error', 'Visualisasi cluster tidak berhasil.');
-            $data['image_base64'] = null;
+            $image_base64 = null;
         }
 
-        $data['clusters'] = $clusters;
+        // Data yang dikirim ke view
+        $data = [
+            'clusters' => $clusteredData,
+            'total_data_before' => $total_data_before,
+            'total_data_after' => $total_data_after,
+            'total_data_removed' => $total_data_removed,
+            'image_base64' => $image_base64,
+            'pre_clustered_map_path' => $data['pre_clustered_map_path'],
+            'post_clustered_map_path' => $data['post_clustered_map_path'],
+        ];
+
         echo view('clustering_result', $data);
     }
 }
