@@ -57,20 +57,38 @@ class Clustering extends Controller
         }
         fclose($file);
 
-        // Jalankan skrip Python untuk visualisasi dan dapatkan gambar sebagai base64
+        // Jalankan skrip Python untuk menghasilkan peta
+        $mapScriptPath = WRITEPATH . 'python_scripts/generate_map.py';
+        $outputMapPath = FCPATH . 'uploads/cluster_map.html'; // Simpan di direktori public
+        $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$tempCsvPath}\" \"{$outputMapPath}\" 2>&1");
+        log_message('debug', 'Menjalankan command generate map: ' . $command);
+        $output = shell_exec($command);
+        log_message('debug', 'Output dari skrip Python generate map: ' . $output);
+
+        // Pastikan peta dihasilkan dengan benar
+        if (file_exists($outputMapPath)) {
+            $data['map_path'] = base_url('uploads/cluster_map.html');
+        } else {
+            log_message('error', 'Peta tidak berhasil dihasilkan.');
+            $data['map_path'] = null;
+        }
+
+        // Jalankan skrip Python untuk visualisasi cluster
         $visualizeScriptPath = WRITEPATH . 'python_scripts/visualize_clusters.py';
         $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$tempCsvPath}\" 2>&1");
-        log_message('debug', 'Menjalankan command visualisasi: ' . $command);
+        log_message('debug', 'Menjalankan command visualize clusters: ' . $command);
         $output = shell_exec($command);
-        log_message('debug', 'Output dari skrip Python visualisasi: ' . $output);
+        log_message('debug', 'Output dari skrip Python visualize clusters: ' . $output);
 
-        // Pastikan output gambar base64 valid
-        if (empty($output)) {
-            log_message('error', 'Output skrip Python visualisasi kosong.');
+        // Periksa hasil visualisasi
+        if (!empty($output) && strpos($output, 'Error') === false) {
+            $data['image_base64'] = trim($output);
+        } else {
+            log_message('error', 'Visualisasi cluster tidak berhasil.');
+            $data['image_base64'] = null;
         }
 
         $data['clusters'] = $clusters;
-        $data['image_base64'] = $output;
         echo view('clustering_result', $data);
     }
 }

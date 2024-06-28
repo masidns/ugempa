@@ -49,15 +49,12 @@
                 <?php else : ?>
                 <p>Tidak ada data clustering yang ditemukan atau terjadi kesalahan dalam pemrosesan.</p>
                 <?php endif; ?>
-
             </div>
         </div>
-        <!-- </section>
 
-    <section class="content"> -->
         <div class="box">
             <div class="box-header">
-                <h3 class="box-title">Cluster Results</h3>
+                <h3 class="box-title">Visualisasi Cluster</h3>
                 <div class="box-tools pull-right">
                     <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
@@ -65,9 +62,27 @@
             </div>
             <div class="box-body">
                 <?php if (isset($image_base64)) : ?>
-                <h3>Visualisasi Cluster</h3>
                 <img src="data:image/png;base64,<?= $image_base64 ?>" alt="Cluster Visualization"
                     style="max-width: 100%; height: auto;">
+                <?php else : ?>
+                <p>Failed to generate visualization. Check the log file for details.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Peta Cluster</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <?php if (isset($map_path)) : ?>
+                <iframe src="<?= $map_path ?>" width="100%" height="500px" frameborder="0"></iframe>
+                <?php else : ?>
+                <p>Peta tidak berhasil dihasilkan atau terjadi kesalahan dalam pemrosesan.</p>
                 <?php endif; ?>
             </div>
         </div>
