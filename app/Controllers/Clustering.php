@@ -40,7 +40,6 @@ class Clustering extends Controller
         log_message('debug', 'Total data removed: ' . $total_data_removed);
 
         // Simpan data gempa yang telah difilter ke file sementara
-        // Simpan data gempa sebelum difilter ke file sementara
         $unfilteredCsvPath = WRITEPATH . 'uploads/unfiltered_gempa_data.csv'; // Path untuk menyimpan file sementara data sebelum filter
         $file = fopen($unfilteredCsvPath, 'w');
         fputcsv($file, ['tgl', 'lat', 'lon', 'depth', 'mag', 'remark']); // Menulis header CSV
@@ -49,6 +48,8 @@ class Clustering extends Controller
             fputcsv($file, [$gempa['tgl'], $gempa['lat'], $gempa['lon'], $gempa['depth'], $gempa['mag'], $gempa['remark']]); // Menulis data gempa
         }
         fclose($file);
+
+        log_message('debug', 'Data yang tidak difilter disimpan ke ' . $unfilteredCsvPath);
 
         // Simpan data gempa yang telah difilter ke file sementara
         $tempCsvPath = WRITEPATH . 'uploads/temp_gempa_data.csv'; // Path untuk menyimpan file sementara
@@ -59,6 +60,8 @@ class Clustering extends Controller
             fputcsv($file, [$gempa['tgl'], $gempa['lat'], $gempa['lon'], $gempa['depth'], $gempa['mag'], $gempa['remark']]); // Menulis data gempa
         }
         fclose($file);
+
+        log_message('debug', 'Data yang difilter disimpan ke ' . $tempCsvPath);
 
         // Jalankan skrip Python untuk clustering
         $pythonExecutable = 'python'; // Menentukan executable Python
@@ -71,7 +74,7 @@ class Clustering extends Controller
         // Path hasil clustering
         $result_csv_path = str_replace(".csv", "_clustered.csv", $tempCsvPath); // Path untuk file hasil clustering
         if (!file_exists($result_csv_path)) {
-            log_message('error', 'File hasil clustering tidak ditemukan.'); // Log error jika file hasil clustering tidak ditemukan
+            log_message('error', 'File hasil clustering tidak ditemukan: ' . $result_csv_path); // Log error jika file hasil clustering tidak ditemukan
             return;
         }
 
@@ -85,35 +88,51 @@ class Clustering extends Controller
         // Debugging: Print clustered data
         log_message('debug', 'Clustered data: ' . print_r($clusteredData, true));
 
+        // Hapus file pre_clustered_map.html jika ada
+        $preClusteredMapPath = FCPATH . 'uploads/pre_clustered_map.html'; // Path untuk menyimpan peta pre-clustered
+        if (file_exists($preClusteredMapPath)) {
+            unlink($preClusteredMapPath);
+            log_message('debug', 'File pre_clustered_map.html dihapus.');
+        }
+
         // Jalankan skrip Python untuk menghasilkan peta sebelum clustering
         $mapScriptPath = WRITEPATH . 'python_scripts/generate_map.py'; // Path untuk skrip Python generate_map
-        $preClusteredMapPath = FCPATH . 'uploads/pre_clustered_map.html'; // Path untuk menyimpan peta pre-clustered
         $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$unfilteredCsvPath}\" \"{$preClusteredMapPath}\" true 2>&1"); // Membuat perintah untuk menjalankan skrip Python generate_map dengan flag pre-clustered
         log_message('debug', 'Menjalankan command generate map (pre-clustered): ' . $command);
         $output = shell_exec($command); // Menjalankan perintah
         log_message('debug', 'Output dari skrip Python generate map (pre-clustered): ' . $output);
 
+        // Tambahkan log untuk memastikan bahwa file dihasilkan
+        log_message('debug', 'Checking if pre-clustered map file exists at: ' . $preClusteredMapPath);
+
         if (file_exists($preClusteredMapPath)) {
+            log_message('debug', 'Peta pre-clustered berhasil dihasilkan: ' . $preClusteredMapPath);
             $data['pre_clustered_map_path'] = base_url('uploads/pre_clustered_map.html'); // Menyimpan path peta pre-clustered ke variabel data
         } else {
-            log_message('error', 'Peta sebelum clustering tidak berhasil dihasilkan.'); // Log error jika peta pre-clustered tidak berhasil dihasilkan
+            log_message('error', 'Peta sebelum clustering tidak berhasil dihasilkan.');
             $data['pre_clustered_map_path'] = null;
         }
 
-        // Jalankan skrip Python untuk menghasilkan peta setelah clustering
+        // Hapus file post_clustered_map.html jika ada
         $postClusteredMapPath = FCPATH . 'uploads/post_clustered_map.html'; // Path untuk menyimpan peta post-clustered
+        if (file_exists($postClusteredMapPath)) {
+            unlink($postClusteredMapPath);
+            log_message('debug', 'File post_clustered_map.html dihapus.');
+        }
+
+        // Jalankan skrip Python untuk menghasilkan peta setelah clustering
         $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$result_csv_path}\" \"{$postClusteredMapPath}\" false 2>&1"); // Membuat perintah untuk menjalankan skrip Python generate_map dengan flag post-clustered
         log_message('debug', 'Menjalankan command generate map (post-clustered): ' . $command);
         $output = shell_exec($command); // Menjalankan perintah
         log_message('debug', 'Output dari skrip Python generate map (post-clustered): ' . $output);
 
         if (file_exists($postClusteredMapPath)) {
+            log_message('debug', 'Peta post-clustered berhasil dihasilkan: ' . $postClusteredMapPath);
             $data['post_clustered_map_path'] = base_url('uploads/post_clustered_map.html'); // Menyimpan path peta post-clustered ke variabel data
         } else {
-            log_message('error', 'Peta setelah clustering tidak berhasil dihasilkan.'); // Log error jika peta post-clustered tidak berhasil dihasilkan
+            log_message('error', 'Peta setelah clustering tidak berhasil dihasilkan.');
             $data['post_clustered_map_path'] = null;
         }
-
         // Jalankan skrip Python untuk visualisasi cluster
         $visualizeScriptPath = WRITEPATH . 'python_scripts/visualize_clusters.py'; // Path untuk skrip Python visualize_clusters
         $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$result_csv_path}\" 2>&1"); // Membuat perintah untuk menjalankan skrip Python visualize_clusters

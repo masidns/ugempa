@@ -19,5 +19,8 @@ $routes->group('Gempa', function ($routes) {
     $routes->delete('delete/(:num)', 'Gempa::delete/$1');
 });
 
-$routes->get('/Clustering', 'Clustering::index');
-$routes->post('/Clustering/cluster', 'Clustering::cluster');
+
+$routes->group('/Clustering', function ($routes) {
+    $routes->get('/', 'Clustering::index');
+    $routes->post('/Clustering/cluster', 'Clustering::cluster');
+});
