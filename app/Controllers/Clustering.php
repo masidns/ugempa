@@ -35,6 +35,10 @@ class Clustering extends Controller
         $total_data_after = count($filteredData);
         $total_data_removed = $total_data_before - $total_data_after;
 
+        log_message('debug', 'Total data before filtering: ' . $total_data_before);
+        log_message('debug', 'Total data after filtering: ' . $total_data_after);
+        log_message('debug', 'Total data removed: ' . $total_data_removed);
+
         // Simpan data gempa yang telah difilter ke file sementara
         // Simpan data gempa sebelum difilter ke file sementara
         $unfilteredCsvPath = WRITEPATH . 'uploads/unfiltered_gempa_data.csv'; // Path untuk menyimpan file sementara data sebelum filter
@@ -77,6 +81,9 @@ class Clustering extends Controller
         $clusteredData = array_map(function ($row) use ($header) {
             return array_combine($header, $row); // Menggabungkan header dengan data
         }, $clusteredData);
+
+        // Debugging: Print clustered data
+        log_message('debug', 'Clustered data: ' . print_r($clusteredData, true));
 
         // Jalankan skrip Python untuk menghasilkan peta sebelum clustering
         $mapScriptPath = WRITEPATH . 'python_scripts/generate_map.py'; // Path untuk skrip Python generate_map

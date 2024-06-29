@@ -12,37 +12,57 @@ def main(input_csv_path, output_html_path, pre_clustered):
         data = pd.read_csv(input_csv_path)  # Membaca data gempa dari file CSV
         print(f"Data read successfully: {data.head()}", file=sys.stderr)  # Menampilkan beberapa baris pertama data yang dibaca
 
-        # Inisialisasi peta dengan lokasi awal di [0, 0] dan zoom start 2
+        # Pastikan kolom 'cluster' ada di data
+        if 'cluster' not in data.columns:
+            raise ValueError("Kolom 'cluster' tidak ditemukan dalam data")
+
+        # Debugging: Print unique cluster values
+        print(f"Unique cluster values: {data['cluster'].unique()}", file=sys.stderr)
+
+        # Definisikan warna untuk cluster menggunakan colormap 'viridis'
+        cmap = plt.get_cmap('viridis')
+        norm = plt.Normalize(vmin=data['cluster'].min(), vmax=data['cluster'].max())  # Normalisasi nilai cluster
+        color_list = cmap(norm(data['cluster'].unique()))  # Mendapatkan daftar warna untuk setiap cluster
+        cluster_colors = {cluster: mcolors.to_hex(color) for cluster, color in zip(data['cluster'].unique(), color_list)}  # Membuat dictionary cluster ke warna
+
+        # Debugging: Print cluster colors
+        print(f"Cluster colors: {cluster_colors}", file=sys.stderr)
+
+        # Inisialisasi peta dengan lokasi awal di Indonesia dan zoom start 5
         print("Initializing map", file=sys.stderr)
-        m = folium.Map(location=[0, 0], zoom_start=2)
+        m = folium.Map(location=[-2.5489, 118.0149], zoom_start=5)  # Koordinat Indonesia
 
         if pre_clustered.lower() == 'true':
-            # Jika data belum dikelompokkan, gunakan warna biru default untuk semua titik
+            # Jika data sudah dikelompokkan, gunakan warna sesuai cluster
             for _, row in data.iterrows():
+                # Debugging: Print row cluster and color
+                cluster = row['cluster']
+                color = cluster_colors.get(cluster, 'blue')  # Default to blue if cluster not found
+                print(f"Row cluster: {cluster}, Color: {color}", file=sys.stderr)
+                
                 folium.CircleMarker(
                     location=[row['lat'], row['lon']],  # Menentukan lokasi titik berdasarkan latitude dan longitude
-                    radius=5,  # Menentukan radius lingkaran
+                    radius=1,  # Menentukan radius lingkaran
                     popup=f"Tanggal: {row['tgl']}<br>Magnitude: {row['mag']}<br>Kedalaman: {row['depth']} km<br>{row['remark']}",  # Informasi popup
-                    color='blue',  # Warna garis lingkaran
+                    color=color,  # Warna garis lingkaran sesuai cluster
                     fill=True,  # Mengisi lingkaran dengan warna
-                    fill_color='blue'  # Warna isian lingkaran
+                    fill_color=color  # Warna isian lingkaran sesuai cluster
                 ).add_to(m)
         else:
-            # Definisikan warna untuk cluster menggunakan colormap 'viridis'
-            cmap = plt.get_cmap('viridis')
-            norm = plt.Normalize(vmin=data['cluster'].min(), vmax=data['cluster'].max())  # Normalisasi nilai cluster
-            color_list = cmap(norm(data['cluster'].unique()))  # Mendapatkan daftar warna untuk setiap cluster
-            cluster_colors = {cluster: mcolors.to_hex(color) for cluster, color in zip(data['cluster'].unique(), color_list)}  # Membuat dictionary cluster ke warna
-
             # Tambahkan titik-titik gempa ke peta dengan warna sesuai cluster
             for _, row in data.iterrows():
+                # Debugging: Print row cluster and color
+                cluster = row['cluster']
+                color = cluster_colors.get(cluster, 'blue')  # Default to blue if cluster not found
+                print(f"Row cluster: {cluster}, Color: {color}", file=sys.stderr)
+                
                 folium.CircleMarker(
                     location=[row['lat'], row['lon']],  # Menentukan lokasi titik berdasarkan latitude dan longitude
-                    radius=5,  # Menentukan radius lingkaran
+                    radius=1,  # Menentukan radius lingkaran
                     popup=f"Tanggal: {row['tgl']}<br>Magnitude: {row['mag']}<br>Kedalaman: {row['depth']} km<br>{row['remark']}",  # Informasi popup
-                    color=cluster_colors[row['cluster']],  # Warna garis lingkaran sesuai cluster
+                    color=color,  # Warna garis lingkaran sesuai cluster
                     fill=True,  # Mengisi lingkaran dengan warna
-                    fill_color=cluster_colors[row['cluster']]  # Warna isian lingkaran sesuai cluster
+                    fill_color=color  # Warna isian lingkaran sesuai cluster
                 ).add_to(m)
 
         # Simpan peta ke file HTML
