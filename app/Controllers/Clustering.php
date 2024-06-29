@@ -36,6 +36,17 @@ class Clustering extends Controller
         $total_data_removed = $total_data_before - $total_data_after;
 
         // Simpan data gempa yang telah difilter ke file sementara
+        // Simpan data gempa sebelum difilter ke file sementara
+        $unfilteredCsvPath = WRITEPATH . 'uploads/unfiltered_gempa_data.csv'; // Path untuk menyimpan file sementara data sebelum filter
+        $file = fopen($unfilteredCsvPath, 'w');
+        fputcsv($file, ['tgl', 'lat', 'lon', 'depth', 'mag', 'remark']); // Menulis header CSV
+
+        foreach ($gempaData as $gempa) {
+            fputcsv($file, [$gempa['tgl'], $gempa['lat'], $gempa['lon'], $gempa['depth'], $gempa['mag'], $gempa['remark']]); // Menulis data gempa
+        }
+        fclose($file);
+
+        // Simpan data gempa yang telah difilter ke file sementara
         $tempCsvPath = WRITEPATH . 'uploads/temp_gempa_data.csv'; // Path untuk menyimpan file sementara
         $file = fopen($tempCsvPath, 'w');
         fputcsv($file, ['tgl', 'lat', 'lon', 'depth', 'mag', 'remark']); // Menulis header CSV
@@ -70,7 +81,7 @@ class Clustering extends Controller
         // Jalankan skrip Python untuk menghasilkan peta sebelum clustering
         $mapScriptPath = WRITEPATH . 'python_scripts/generate_map.py'; // Path untuk skrip Python generate_map
         $preClusteredMapPath = FCPATH . 'uploads/pre_clustered_map.html'; // Path untuk menyimpan peta pre-clustered
-        $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$tempCsvPath}\" \"{$preClusteredMapPath}\" true 2>&1"); // Membuat perintah untuk menjalankan skrip Python generate_map dengan flag pre-clustered
+        $command = escapeshellcmd("{$pythonExecutable} \"{$mapScriptPath}\" \"{$unfilteredCsvPath}\" \"{$preClusteredMapPath}\" true 2>&1"); // Membuat perintah untuk menjalankan skrip Python generate_map dengan flag pre-clustered
         log_message('debug', 'Menjalankan command generate map (pre-clustered): ' . $command);
         $output = shell_exec($command); // Menjalankan perintah
         log_message('debug', 'Output dari skrip Python generate map (pre-clustered): ' . $output);
