@@ -60,6 +60,9 @@ writable/session/*
 writable/uploads/*
 !writable/uploads/index.html
 
+public/uploads/pre_clustered_map.html
+public/uploads/post_clustered_map.html
+
 writable/debugbar/*
 !writable/debugbar/.gitkeep
 
