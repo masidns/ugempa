@@ -41,7 +41,7 @@ def main(input_csv_path, output_html_path, pre_clustered):
             for _, row in data.iterrows():
                 folium.CircleMarker(
                     location=[row['lat'], row['lon']],  # Menentukan lokasi titik berdasarkan latitude dan longitude
-                    radius=1,  # Menentukan radius lingkaran
+                    radius=2,  # Menentukan radius lingkaran
                     popup=f"Tanggal: {row['tgl']}<br>Magnitude: {row['mag']}<br>Kedalaman: {row['depth']} km<br>{row['remark']}",  # Informasi popup
                     color='blue',  # Warna garis lingkaran biru
                     fill=True,  # Mengisi lingkaran dengan warna
@@ -54,7 +54,7 @@ def main(input_csv_path, output_html_path, pre_clustered):
                 color = cluster_colors.get(cluster, 'blue')  # Default to blue if cluster not found
                 folium.CircleMarker(
                     location=[row['lat'], row['lon']],  # Menentukan lokasi titik berdasarkan latitude dan longitude
-                    radius=1,  # Menentukan radius lingkaran
+                    radius=2,  # Menentukan radius lingkaran
                     popup=f"Tanggal: {row['tgl']}<br>Magnitude: {row['mag']}<br>Kedalaman: {row['depth']} km<br>{row['remark']}",  # Informasi popup
                     color=color,  # Warna garis lingkaran sesuai cluster
                     fill=True,  # Mengisi lingkaran dengan warna
