@@ -52,6 +52,12 @@
                 </ul>
             </li> -->
 
+            <li class="treeview">
+                <a href="<?= base_url('Home') ?>">
+                    <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                </a>
+            </li>
+
             <li>
                 <a href="<?= base_url('Gempa') ?>">
                     <i class="fa fa-th"></i> <span>Data Gempa</span>

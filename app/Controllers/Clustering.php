@@ -9,7 +9,15 @@ class Clustering extends Controller
 {
     public function index()
     {
-        echo view('clustering_view'); // Menampilkan view untuk clustering
+        // $model = new GempaModel();
+        // $gempaData = $model->findAll(); // Mengambil semua data gempa dari model
+
+        // if (empty($gempaData)) {
+        //     log_message('error', 'Tidak ada data gempa di database.');
+        //     echo "<script>alert('Tidak ada data gempa, silahkan input terlebih dahulu');</script>";
+        //     return redirect()->to('/Gempa'); // Kembali ke function index
+        // }
+        return view('clustering_view'); // Menampilkan view untuk clustering
     }
 
     public function cluster()
@@ -24,6 +32,12 @@ class Clustering extends Controller
 
         $model = new GempaModel();
         $gempaData = $model->findAll(); // Mengambil semua data gempa dari model
+
+        if (empty($gempaData)) {
+            log_message('error', 'Tidak ada data gempa di database.');
+            session()->setFlashdata('error', 'Tidak ada data gempa, silahkan input terlebih dahulu');
+            return redirect()->to('/Gempa'); // Kembali ke function index
+        }
 
         // Filter data untuk hanya menyertakan baris yang mengandung kata "Indonesia"
         $filteredData = array_filter($gempaData, function ($item) {

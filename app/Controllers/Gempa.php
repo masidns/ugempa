@@ -86,7 +86,7 @@ class Gempa extends BaseController
 
             return redirect()->to('/Gempa');
         } else {
-            return redirect()->to('/Gempa/tambah')->with('error', 'There was a problem with the file upload');
+            return redirect()->to('/Gempa/tambah')->with('error', 'Terjadi masalah saat mengunggah file');
         }
     }
 

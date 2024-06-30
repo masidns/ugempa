@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>AdminLTE 2 | Fixed Layout</title>
+    <title>Clustering earthquake. - DS7</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.5 -->
@@ -21,9 +21,9 @@
          folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="<?= base_url() ?>dist/css/skins/_all-skins.min.css">
     <script>
-    function startClustering() {
-        document.getElementById('status').innerHTML = 'Proses clustering sedang berjalan, mohon tunggu...';
-    }
+        function startClustering() {
+            document.getElementById('status').innerHTML = 'Proses clustering sedang berjalan, mohon tunggu...';
+        }
     </script>
 
 </head>
@@ -44,6 +44,7 @@
         <!-- =============================================== -->
 
         <!-- Content Wrapper. Contains page content -->
+
         <?= $this->renderSection('content') ?>
 
         <?= $this->include('layout/footer') ?>
@@ -59,6 +60,9 @@
 
     <!-- Bootstrap 3.3.5 -->
     <script src="<?= base_url() ?>bootstrap/js/bootstrap.min.js"></script>
+    <!-- Morris.js charts
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="<?= base_url() ?>/plugins/morris/morris.min.js"></script> -->
     <!-- DataTables -->
     <script src="<?= base_url() ?>plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="<?= base_url() ?>plugins/datatables/dataTables.bootstrap.min.js"></script>
@@ -81,20 +85,26 @@
         });
     </script> -->
 
+    <script>
+        setTimeout(function() {
 
+            document.getElementById('error-alert').style.display = 'none';
+
+        }, 3000);
+    </script>
 
     <script>
-    $(function() {
-        $("#example1").DataTable();
-        $('#example2').DataTable({
-            "paging": true,
-            "lengthChange": false,
-            "searching": false,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false
+        $(function() {
+            $("#example1").DataTable();
+            $('#example2').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false
+            });
         });
-    });
     </script>
 </body>
 
