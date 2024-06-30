@@ -3,7 +3,10 @@
 #-------------------------
 
 # Ignore the uploads folder
+# Ignore all files in the uploads folder
 public/uploads/*
+# But keep the folder itself
+!public/uploads/.gitkeep
 #-------------------------
 # Operating Specific Junk Files
 #-------------------------
