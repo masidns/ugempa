@@ -1,8 +1,14 @@
 #-------------------------
-# Operating Specific Junk Files
+# Configuration Files
 #-------------------------
 
+# Ignore the uploads folder
+public/uploads/*
+#-------------------------
+# Operating Specific Junk Files
+#-------------------------
 # OS X
+
 .DS_Store
 .AppleDouble
 .LSOverride
