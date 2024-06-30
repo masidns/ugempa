@@ -9,6 +9,7 @@ $routes->setAutoRoute(true);
 
 $routes->get('/', 'Home::index');
 $routes->get('/Testing', 'Testing::index');
+$routes->get('/Dashboard', 'Dashboard::index');
 
 $routes->group('Gempa', function ($routes) {
     $routes->get('/', 'Gempa::index');

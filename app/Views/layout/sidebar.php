@@ -53,7 +53,7 @@
             </li> -->
 
             <li class="treeview">
-                <a href="<?= base_url('Home') ?>">
+                <a href="<?= base_url('Dashboard') ?>">
                     <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                 </a>
             </li>
