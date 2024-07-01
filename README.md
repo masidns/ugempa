@@ -68,7 +68,7 @@ Additionally, make sure that the following extensions are enabled in your PHP:
 - [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
 
 ## Python
-- install python(https://www.python.org/downloads/)
+- install [python](https://www.python.org/downloads/)
 - install pip (python get-pip.py)
 - cek pip --version
 - python -m ensurepip --upgrade
