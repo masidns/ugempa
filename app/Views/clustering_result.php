@@ -23,6 +23,8 @@
                 <p>Total Data Setelah Filtering: <?= esc($total_data_after) ?></p>
                 <p>Total Data yang Dihapus: <?= esc($total_data_removed) ?></p>
                 <p>Total cluster: <?= esc($idclusters) ?></p>
+                <p>Cluster Berdasarkan: <?= esc($cluster_by) ?></p>
+                <p>Tahun: <?= esc($year) ?></p>
 
                 <?php if (!empty($clusters) && is_array($clusters)) : ?>
                 <table id="example1" class="table table-bordered table-striped">

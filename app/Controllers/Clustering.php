@@ -9,27 +9,32 @@ class Clustering extends Controller
 {
     public function index()
     {
-        echo view('clustering_view'); // Menampilkan view untuk clustering
+        $years = $this->getYears(); // Mendapatkan daftar tahun
+        echo view('clustering_view', ['years' => $years]); // Menampilkan view untuk clustering dengan data tahun
     }
 
     public function cluster()
     {
         $n_clusters = $this->request->getPost('n_clusters'); // Mendapatkan jumlah cluster dari form input
+        $cluster_by = $this->request->getPost('cluster_by'); // Mendapatkan metode clustering dari form input
+        $year = $this->request->getPost('year'); // Mendapatkan tahun dari form input
         log_message('debug', 'Jumlah cluster yang diterima dari form: ' . $n_clusters);
+        log_message('debug', 'Cluster berdasarkan: ' . $cluster_by);
+        log_message('debug', 'Tahun: ' . $year);
 
-        if (empty($n_clusters)) {
-            log_message('error', 'Jumlah cluster tidak ditemukan di form.'); // Log error jika jumlah cluster tidak ditemukan
+        if (empty($n_clusters) || empty($cluster_by)) {
+            log_message('error', 'Jumlah cluster atau metode clustering tidak ditemukan di form.'); // Log error jika input tidak ditemukan
             return;
         }
 
-        $gempaData = $this->getGempaData();
+        $gempaData = $this->getGempaData($year);
         $filteredData = $this->filterData($gempaData);
         $this->logDataCounts($gempaData, $filteredData);
 
         $unfilteredCsvPath = $this->saveDataToCsv($gempaData, 'unfiltered_gempa_data.csv');
         $tempCsvPath = $this->saveDataToCsv($filteredData, 'temp_gempa_data.csv');
 
-        $result_csv_path = $this->runClusteringScript($tempCsvPath, $n_clusters);
+        $result_csv_path = $this->runClusteringScript($tempCsvPath, $n_clusters, $cluster_by);
         if (!$result_csv_path) return;
 
         $clusteredData = $this->readClusteredData($result_csv_path);
@@ -37,7 +42,12 @@ class Clustering extends Controller
         $preClusteredMapPath = $this->generateMap($unfilteredCsvPath, 'pre_clustered_map.html', true);
         $postClusteredMapPath = $this->generateMap($result_csv_path, 'post_clustered_map.html', false);
 
-        $image_base64 = $this->visualizeClusters($result_csv_path);
+        $year_range = null;
+        if ($year === 'all') {
+            $year_range = $this->getYearRange();
+        }
+
+        $image_base64 = $this->visualizeClusters($result_csv_path, $cluster_by, $year, $year_range);
 
         $data = [
             'idclusters' => $n_clusters,
@@ -48,15 +58,35 @@ class Clustering extends Controller
             'image_base64' => $image_base64,
             'pre_clustered_map_path' => $preClusteredMapPath,
             'post_clustered_map_path' => $postClusteredMapPath,
+            'cluster_by' => $cluster_by, // Menambahkan cluster_by ke data
+            'year' => $year, // Menambahkan year ke data
         ];
 
         return view('clustering_result', $data); // Menampilkan hasil ke view
     }
 
-    private function getGempaData()
+    private function getGempaData($year)
     {
         $model = new GempaModel();
-        return $model->findAll(); // Mengambil semua data gempa dari model
+        if ($year === 'all') {
+            return $model->findAll(); // Mengambil semua data gempa dari model
+        } else {
+            return $model->where('YEAR(tgl)', $year)->findAll(); // Mengambil data gempa berdasarkan tahun
+        }
+    }
+
+    private function getYears()
+    {
+        $model = new GempaModel();
+        return $model->select('YEAR(tgl) as year')->distinct()->orderBy('year', 'DESC')->findAll();
+    }
+
+    private function getYearRange()
+    {
+        $model = new GempaModel();
+        $minYear = $model->select('MIN(YEAR(tgl)) as min_year')->first()['min_year'];
+        $maxYear = $model->select('MAX(YEAR(tgl)) as max_year')->first()['max_year'];
+        return [$minYear, $maxYear];
     }
 
     private function filterData($gempaData)
@@ -92,11 +122,11 @@ class Clustering extends Controller
         return $csvPath;
     }
 
-    private function runClusteringScript($csvPath, $n_clusters)
+    private function runClusteringScript($csvPath, $n_clusters, $cluster_by)
     {
         $pythonExecutable = 'python';
         $clusterScriptPath = WRITEPATH . 'python_scripts/cluster.py';
-        $command = escapeshellcmd("{$pythonExecutable} \"{$clusterScriptPath}\" \"{$csvPath}\" {$n_clusters} 2>&1");
+        $command = escapeshellcmd("{$pythonExecutable} \"{$clusterScriptPath}\" \"{$csvPath}\" {$n_clusters} {$cluster_by} 2>&1");
         log_message('debug', 'Menjalankan command clustering: ' . $command);
         $output = shell_exec($command);
         log_message('debug', 'Output dari skrip Python clustering: ' . $output);
@@ -142,11 +172,11 @@ class Clustering extends Controller
         }
     }
 
-    private function visualizeClusters($csvPath)
+    private function visualizeClusters($csvPath, $cluster_by, $year, $year_range = null)
     {
         $pythonExecutable = 'python';
         $visualizeScriptPath = WRITEPATH . 'python_scripts/visualize_clusters.py';
-        $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$csvPath}\" 2>&1");
+        $command = escapeshellcmd("{$pythonExecutable} \"{$visualizeScriptPath}\" \"{$csvPath}\" \"{$cluster_by}\" \"{$year}\" " . ($year_range ? implode(' ', $year_range) : '') . " 2>&1");
         log_message('debug', 'Menjalankan command visualize clusters: ' . $command);
         $output = shell_exec($command);
         log_message('debug', 'Output dari skrip Python visualize clusters: ' . $output);

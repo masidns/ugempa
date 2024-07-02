@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
 
-def main(csv_file_path):
+def main(csv_file_path, cluster_by, year, year_range=None):
     try:
         # Baca data hasil clustering
         print(f"Reading CSV file from: {csv_file_path}", file=sys.stderr)
@@ -13,15 +13,39 @@ def main(csv_file_path):
         
         # Plotting
         plt.figure(figsize=(10, 6))
-        scatter = plt.scatter(data['depth'], data['mag'], c=data['cluster'], cmap='viridis')
+        if cluster_by == 'depth':
+            scatter = plt.scatter(data['lon'], data['lat'], c=data['cluster'], cmap='viridis', edgecolor='k')
+            plt.xlabel('Longitude')
+            plt.ylabel('Latitude')
+            title = f'Clustering of Earthquake Data by Depth ({year})'
+        elif cluster_by == 'magnitude':
+            scatter = plt.scatter(data['lon'], data['lat'], c=data['cluster'], cmap='viridis', edgecolor='k')
+            plt.xlabel('Longitude')
+            plt.ylabel('Latitude')
+            title = f'Clustering of Earthquake Data by Magnitude ({year})'
+        elif cluster_by == 'depth & magnitude':
+            scatter = plt.scatter(data['lon'], data['lat'], c=data['cluster'], cmap='viridis', edgecolor='k')
+            plt.xlabel('Longitude')
+            plt.ylabel('Latitude')
+            title = f'Clustering of Earthquake Data by Depth and Magnitude ({year})'
+        else:
+            raise ValueError("Invalid cluster_by value")
+        
+        if year == 'all' and year_range:
+            title = f'Clustering of Earthquake Data by {cluster_by.capitalize()} ({year_range[0]} - {year_range[1]})'
+        
         plt.colorbar(scatter, label='Cluster')
-        plt.xlabel('Depth')
-        plt.ylabel('Magnitude')
-        plt.title('Clustering of Earthquake Data')
+        plt.title(title)
+
+        # Menambahkan informasi total data di setiap cluster pada legenda
+        cluster_counts = data['cluster'].value_counts().sort_index()
+        legend_labels = [f'Cluster {i} ({count})' for i, count in cluster_counts.items()]
+        handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=scatter.cmap(scatter.norm(i)), markersize=10) for i in cluster_counts.index]
+        plt.legend(handles, legend_labels, title='Cluster', bbox_to_anchor=(1.2, 1), loc='upper left', borderaxespad=0.)
 
         # Simpan gambar ke dalam buffer
         buffer = BytesIO()
-        plt.savefig(buffer, format='png')
+        plt.savefig(buffer, format='png', bbox_inches='tight')
         plt.close()
         buffer.seek(0)
 
@@ -33,4 +57,9 @@ def main(csv_file_path):
 
 if __name__ == "__main__":
     csv_file_path = sys.argv[1]
-    main(csv_file_path)
+    cluster_by = sys.argv[2]
+    year = sys.argv[3]
+    year_range = None
+    if year == 'all' and len(sys.argv) > 4:
+        year_range = (sys.argv[4], sys.argv[5])
+    main(csv_file_path, cluster_by, year, year_range)

@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 from sklearn.cluster import KMeans
 
-def main(input_csv, n_clusters):
+def main(input_csv, n_clusters, cluster_by):
     try:
         # Mencetak jumlah cluster yang diterima
         print(f"Jumlah cluster yang diterima: {n_clusters}")
@@ -10,7 +10,15 @@ def main(input_csv, n_clusters):
         print(f"Reading CSV file from: {input_csv}")
 
         data = pd.read_csv(input_csv)  # Membaca data gempa dari file CSV
-        non_coordinate_columns = ['depth', 'mag']  # Kolom yang digunakan untuk clustering
+
+        if cluster_by == 'depth':
+            non_coordinate_columns = ['depth']
+        elif cluster_by == 'magnitude':
+            non_coordinate_columns = ['mag']
+        elif cluster_by == 'depth_magnitude':
+            non_coordinate_columns = ['depth', 'mag']
+        else:
+            raise ValueError("Invalid cluster_by value")
 
         print(f"Non-coordinate columns: {non_coordinate_columns}")
 
@@ -33,4 +41,5 @@ if __name__ == "__main__":
     # Mengambil argumen dari command line
     input_csv = sys.argv[1]  # Path file CSV input
     n_clusters = sys.argv[2]  # Jumlah cluster yang diinginkan
-    main(input_csv, n_clusters)  # Menjalankan fungsi utama dengan argumen yang diberikan
+    cluster_by = sys.argv[3]  # Metode clustering
+    main(input_csv, n_clusters, cluster_by)  # Menjalankan fungsi utama dengan argumen yang diberikan

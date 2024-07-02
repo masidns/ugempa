@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.colors import ListedColormap
 
-def main(input_csv_path, output_html_path, pre_clustered):
+def main(input_csv_path, output_html_path, pre_clustered, cluster_by):
     try:
         # Membaca data dari file CSV
         print(f"Reading data from {input_csv_path}", file=sys.stderr)
@@ -74,4 +74,5 @@ if __name__ == "__main__":
     input_csv_path = sys.argv[1]  # Path file CSV input
     output_html_path = sys.argv[2]  # Path file HTML output
     pre_clustered = sys.argv[3].lower() == 'true'  # Flag apakah data sudah dikelompokkan atau belum
-    main(input_csv_path, output_html_path, pre_clustered)  # Menjalankan fungsi utama dengan argumen yang diberikan
+    cluster_by = sys.argv[4]  # Metode clustering
+    main(input_csv_path, output_html_path, pre_clustered, cluster_by)  # Menjalankan fungsi utama dengan argumen yang diberikan
