@@ -1,6 +1,7 @@
 import sys
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 def main(input_csv, n_clusters, cluster_by):
     try:
@@ -24,9 +25,13 @@ def main(input_csv, n_clusters, cluster_by):
 
         X = data[non_coordinate_columns]  # Memilih kolom untuk clustering
 
+        # Normalisasi data
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
         # Menjalankan KMeans dengan jumlah cluster yang ditentukan
         print(f"Running KMeans with n_clusters={n_clusters}")
-        kmeans = KMeans(n_clusters=int(n_clusters), random_state=0).fit(X)  # Menggunakan KMeans untuk clustering
+        kmeans = KMeans(n_clusters=int(n_clusters), random_state=42).fit(X_scaled)  # Menggunakan KMeans untuk clustering
 
         data['cluster'] = kmeans.labels_  # Menambahkan hasil clustering ke kolom baru 'cluster'
 
