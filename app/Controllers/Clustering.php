@@ -49,6 +49,8 @@ class Clustering extends Controller
 
         $image_base64 = $this->visualizeClusters($result_csv_path, $cluster_by, $year, $year_range);
 
+        $silhouette_score = $this->calculateSilhouetteScore($result_csv_path, $n_clusters, $cluster_by);
+
         $data = [
             'idclusters' => $n_clusters,
             'clusters' => $clusteredData,
@@ -60,6 +62,7 @@ class Clustering extends Controller
             'post_clustered_map_path' => $postClusteredMapPath,
             'cluster_by' => $cluster_by, // Menambahkan cluster_by ke data
             'year' => $year, // Menambahkan year ke data
+            'silhouette_score' => $silhouette_score, // Menambahkan silhouette score ke data
         ];
 
         return view('clustering_result', $data); // Menampilkan hasil ke view
@@ -189,5 +192,24 @@ class Clustering extends Controller
             $image_base64 = null;
         }
         return $image_base64;
+    }
+
+    private function calculateSilhouetteScore($csvPath, $n_clusters, $cluster_by)
+    {
+        $pythonExecutable = 'python';
+        $silhouetteScriptPath = WRITEPATH . 'python_scripts/calculate_silhouette.py';
+        $command = escapeshellcmd("{$pythonExecutable} \"{$silhouetteScriptPath}\" \"{$csvPath}\" {$n_clusters} {$cluster_by}");
+        log_message('debug', 'Menjalankan command calculate silhouette: ' . $command);
+        $output = shell_exec($command);
+        log_message('debug', 'Output dari skrip Python calculate silhouette: ' . $output);
+
+        if (!empty($output) && strpos($output, 'Error') === false) {
+            $silhouette_score = trim($output); // Mengambil output silhouette score jika tidak ada error
+            log_message('debug', 'Silhouette Score: ' . $silhouette_score);
+        } else {
+            log_message('error', 'Perhitungan Silhouette Score tidak berhasil.'); // Log error jika perhitungan tidak berhasil
+            $silhouette_score = null;
+        }
+        return $silhouette_score;
     }
 }
