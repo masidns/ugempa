@@ -153,6 +153,7 @@ class Clustering extends Controller
 
     private function generateMap($csvPath, $mapFilename, $isPreClustered)
     {
+        set_time_limit(1000);
         $mapPath = FCPATH . 'uploads/' . $mapFilename;
         if (file_exists($mapPath)) {
             unlink($mapPath);
@@ -211,5 +212,44 @@ class Clustering extends Controller
             $silhouette_score = null;
         }
         return $silhouette_score;
-    }   
+    }
+
+    public function calculateSilhouette()
+    {
+        $n_clusters = $this->request->getJSON()->n_clusters;
+        $cluster_by = $this->request->getJSON()->cluster_by;
+        $year = $this->request->getJSON()->year;
+
+        log_message('debug', 'n_clusters: ' . $n_clusters);
+        log_message('debug', 'cluster_by: ' . $cluster_by);
+        log_message('debug', 'year: ' . $year);
+
+        if (empty($n_clusters) || empty($cluster_by) || empty($year)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid input']);
+        }
+
+        $gempaData = $this->getGempaData($year);
+        $filteredData = $this->filterData($gempaData);
+        $tempCsvPath = $this->saveDataToCsv($filteredData, 'temp_gempa_data.csv');
+
+        $silhouette_score = $this->calculateSilhouetteScore($tempCsvPath, $n_clusters, $cluster_by);
+
+        $total_data_before = count($gempaData);
+        $total_data_after = count($filteredData);
+        $total_data_removed = $total_data_before - $total_data_after;
+
+        if ($silhouette_score !== null) {
+            return $this->response->setJSON([
+                'success' => true,
+                'silhouette_score' => $silhouette_score,
+                'total_data_before' => $total_data_before,
+                'total_data_after' => $total_data_after,
+                'total_data_removed' => $total_data_removed,
+                'cluster_by' => $cluster_by, // Tambahkan ini
+                'year' => $year // Tambahkan ini
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to calculate silhouette score']);
+        }
+    }
 }

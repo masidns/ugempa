@@ -24,6 +24,7 @@ $routes->group('Gempa', function ($routes) {
 $routes->group('/Clustering', function ($routes) {
     $routes->get('/', 'Clustering::index');
     $routes->post('/Clustering/cluster', 'Clustering::cluster');
+    $routes->post('/calculateSilhouette', 'Clustering::calculateSilhouette');
 });
 
 $routes->group('/Silhouette', function ($routes) {

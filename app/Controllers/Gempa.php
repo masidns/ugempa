@@ -34,7 +34,7 @@ class Gempa extends BaseController
     }
     public function save()
     {
-        $save = $this->GempaModel->save([
+        $this->GempaModel->save([
             'tgl' => $this->request->getVar('tgl'),
             'lat' => $this->request->getVar('lat'),
             'lon' => $this->request->getVar('lon'),
@@ -54,6 +54,8 @@ class Gempa extends BaseController
 
     public function uploadCsv()
     {
+        // set_time_limit(1000); // Menambah batas waktu menjadi 300 detik (5 menit)
+
         $file = $this->request->getFile('csvfile');
 
         if ($file->isValid() && !$file->hasMoved()) {
@@ -61,9 +63,7 @@ class Gempa extends BaseController
             $csvData = array_map('str_getcsv', file($filePath));
             $header = array_shift($csvData);
 
-            $model = new GempaModel();
-            $existingData = $model->findAll();
-
+            $model = $this->GempaModel;
             $newData = [];
             foreach ($csvData as $row) {
                 $data = array_combine($header, $row);
@@ -74,7 +74,7 @@ class Gempa extends BaseController
                 }
 
                 // Check if the data already exists
-                if (!$this->isDuplicate($data, $existingData)) {
+                if (!$this->isDuplicate($data)) {
                     $newData[] = $data;
                 }
             }
@@ -90,6 +90,7 @@ class Gempa extends BaseController
         }
     }
 
+
     private function formatDate($date)
     {
         // Assuming the input date format is mm/dd/yyyy
@@ -103,22 +104,21 @@ class Gempa extends BaseController
         }
     }
 
-    private function isDuplicate($data, $existingData)
+    private function isDuplicate($data)
     {
-        foreach ($existingData as $existing) {
-            if (
-                $existing['tgl'] == $data['tgl'] &&
-                $existing['lat'] == $data['lat'] &&
-                $existing['lon'] == $data['lon'] &&
-                $existing['depth'] == $data['depth'] &&
-                $existing['mag'] == $data['mag'] &&
-                $existing['remark'] == $data['remark']
-            ) {
-                return true;
-            }
-        }
-        return false;
+        $model = $this->GempaModel;
+        $exists = $model->where([
+            'tgl' => $data['tgl'],
+            'lat' => $data['lat'],
+            'lon' => $data['lon'],
+            'depth' => $data['depth'],
+            'mag' => $data['mag'],
+            'remark' => $data['remark'],
+        ])->first();
+
+        return !empty($exists);
     }
+
 
     public function delete($idgempa)
     {
