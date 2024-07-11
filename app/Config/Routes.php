@@ -25,3 +25,9 @@ $routes->group('/Clustering', function ($routes) {
     $routes->get('/', 'Clustering::index');
     $routes->post('/Clustering/cluster', 'Clustering::cluster');
 });
+
+$routes->group('/Silhouette', function ($routes) {
+    $routes->get('/', 'Silhouette::index');
+    $routes->post('/Silhouette/calculate', 'Silhouette::calculate');
+    $routes->post('/Silhouette/result', 'Silhouette::result');
+});
