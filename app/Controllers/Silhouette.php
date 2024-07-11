@@ -35,9 +35,9 @@ class Silhouette extends BaseController
         // Simpan data ke file CSV sementara
         $csvPath = WRITEPATH . 'uploads/temp_gempa_data_Silhouette_Score.csv';
         $file = fopen($csvPath, 'w');
-        fputcsv($file, ['depth', 'mag']); // Header CSV
+        fputcsv($file, ['depth', 'mag', 'remark']); // Header CSV
         foreach ($data as $row) {
-            fputcsv($file, [$row['depth'], $row['mag']]);
+            fputcsv($file, [$row['depth'], $row['mag'], $row['remark']]);
         }
         fclose($file);
 

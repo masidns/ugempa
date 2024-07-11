@@ -8,7 +8,7 @@ def main():
         print("Usage: python calculate_silhouette.py <csv_path> <n_clusters> <cluster_by>")
         return
 
-    print(f"Arguments received: {sys.argv}")  # Tambahkan log untuk melihat argumen yang diterima
+    # print(f"Arguments received: {sys.argv}")  # Komentari atau hapus baris ini
 
     csv_path = sys.argv[1]
     n_clusters = int(sys.argv[2])
@@ -26,7 +26,7 @@ def main():
         print("Invalid cluster_by value")
         return
 
-    kmeans = KMeans(n_clusters=n_clusters)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)  # Tetapkan random_state untuk konsistensi
     labels = kmeans.fit_predict(X)
 
     score = silhouette_score(X, labels)

@@ -7,12 +7,20 @@ import pandas as pd
 def load_data(csv_path, cluster_by):
     try:
         data = pd.read_csv(csv_path)
+        
+        # Filter data yang mengandung kata "Indonesia" di kolom remark
+        data = data[data['remark'].str.contains("Indonesia", case=False, na=False)]
+        
+        # Mengatasi missing value dengan menghapus baris yang memiliki missing value
+        data = data.dropna(subset=['depth', 'mag'])
+        
         if cluster_by == 'depth':
             features = data[['depth']]
         elif cluster_by == 'magnitude':
             features = data[['mag']]
         elif cluster_by == 'depth_magnitude':
             features = data[['depth', 'mag']]
+        
         print(f"Data loaded: {features.head()}", file=sys.stderr)  # Tambahkan log untuk melihat data yang dimuat
         return features
     except Exception as e:
