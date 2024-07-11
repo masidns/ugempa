@@ -19,13 +19,19 @@
                 </div>
             </div>
             <div class="box-body">
-                <p>Total Data Sebelum Filtering: <?= esc($total_data_before) ?></p>
-                <p>Total Data Setelah Filtering: <?= esc($total_data_after) ?></p>
-                <p>Total Data yang Dihapus: <?= esc($total_data_removed) ?></p>
-                <p>Total cluster: <?= esc($idclusters) ?></p>
-                <p>Cluster Berdasarkan: <?= esc($cluster_by) ?></p>
-                <p>Tahun: <?= esc($year) ?></p>
-                <p>Silhouette Score: <?= esc($silhouette_score) ?></p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>Total Data Sebelum Filtering: <?= esc($total_data_before) ?></p>
+                        <p>Total Data Setelah Filtering: <?= esc($total_data_after) ?></p>
+                        <p>Total Data yang Dihapus: <?= esc($total_data_removed) ?></p>
+                        <p>Total cluster: <?= esc($idclusters) ?></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p>Cluster Berdasarkan: <?= esc($cluster_by) ?></p>
+                        <p>Tahun: <?= esc($year) ?></p>
+                        <p>Silhouette Score: <?= esc($silhouette_score) ?></p>
+                    </div>
+                </div>
 
                 <?php if (!empty($clusters) && is_array($clusters)) : ?>
                 <table id="example1" class="table table-bordered table-striped">

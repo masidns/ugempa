@@ -64,12 +64,11 @@
                     <!-- <small class="label pull-right bg-green">new</small> -->
                 </a>
             </li>
-            <li>
+            <!-- <li>
                 <a href="<?= base_url('Silhouette') ?>">
                     <i class="fa fa-th"></i> <span>Silhouette</span>
-                    <!-- <small class="label pull-right bg-green">new</small> -->
                 </a>
-            </li>
+            </li> -->
             <li>
                 <a href="<?= base_url('Clustering') ?>">
                     <i class="fa fa-th"></i> <span>Clustering</span>

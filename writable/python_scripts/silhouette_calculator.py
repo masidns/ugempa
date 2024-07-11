@@ -33,7 +33,7 @@ def calculate_silhouette(csv_path, cluster_by, max_clusters):
     if data is not None:
         print(f"Data loaded for silhouette calculation:\n{data.head()}", file=sys.stderr)  # Tambahkan log untuk melihat data yang dimuat
         for n_clusters in range(2, max_clusters + 1):
-            kmeans = KMeans(n_clusters=n_clusters)  # Menggunakan jumlah cluster yang berbeda
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42)  # Menggunakan jumlah cluster yang berbeda
             labels = kmeans.fit_predict(data)
             score = silhouette_score(data, labels)
             results[f'Cluster {n_clusters}'] = score
